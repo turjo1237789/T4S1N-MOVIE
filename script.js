@@ -15,6 +15,12 @@ const genreFilters = document.getElementById('genreFilters');
 const statusText = document.getElementById('statusText');
 const apiHint = document.getElementById('apiHint');
 const loadMoreBtn = document.getElementById('loadMoreBtn');
+const playerModal = document.getElementById('playerModal');
+const playerFrame = document.getElementById('playerFrame');
+const playerTitle = document.getElementById('playerTitle');
+const playerMeta = document.getElementById('playerMeta');
+const playerStatus = document.getElementById('playerStatus');
+const closePlayerBtn = document.getElementById('closePlayerBtn');
 
 let genres = [];
 let activeGenre = 0;
@@ -33,8 +39,44 @@ function getYear(movie) {
   return movie.release_date ? movie.release_date.slice(0, 4) : 'N/A';
 }
 
-function getMovieLink(movie) {
-  return movie?.id ? `https://www.themoviedb.org/movie/${movie.id}` : '#';
+function getTrailerEmbedUrl(videoKey) {
+  return `https://www.youtube.com/embed/${videoKey}?autoplay=1&rel=0`;
+}
+
+async function openMoviePlayer(movie) {
+  playerModal.classList.add('show');
+  playerModal.setAttribute('aria-hidden', 'false');
+  playerTitle.textContent = movie.title || 'Now Playing';
+  playerMeta.textContent = `${getYear(movie)} · ⭐ ${(movie.vote_average || 0).toFixed(1)}`;
+  playerStatus.textContent = 'Loading trailer...';
+  playerFrame.src = '';
+
+  if (!movie?.id || useFallback) {
+    playerStatus.textContent = 'Demo mode: trailer unavailable for fallback movie.';
+    return;
+  }
+
+  try {
+    const videos = await fetchTmdb(`/movie/${movie.id}/videos`, { language: 'en-US' });
+    const trailer = (videos.results || []).find(v => v.site === 'YouTube' && (v.type === 'Trailer' || v.type === 'Teaser'))
+      || (videos.results || []).find(v => v.site === 'YouTube');
+
+    if (!trailer?.key) {
+      playerStatus.textContent = 'Trailer not available for this movie.';
+      return;
+    }
+
+    playerFrame.src = getTrailerEmbedUrl(trailer.key);
+    playerStatus.textContent = '';
+  } catch (error) {
+    playerStatus.textContent = 'Could not load trailer right now. Please try another movie.';
+  }
+}
+
+function closeMoviePlayer() {
+  playerModal.classList.remove('show');
+  playerModal.setAttribute('aria-hidden', 'true');
+  playerFrame.src = '';
 }
 
 function renderMovies(list, append = false) {
@@ -45,14 +87,15 @@ function renderMovies(list, append = false) {
     return;
   }
 
+  movieGrid.__lastRenderedMovies = append ? [ ...(movieGrid.__lastRenderedMovies || []), ...list ] : [ ...list ];
   movieGrid.insertAdjacentHTML('beforeend', list.map(movie => `
-    <article class="movie-card" data-movie-link="${getMovieLink(movie)}">
+    <article class="movie-card" data-movie-id="${movie.id || ''}" role="button" tabindex="0" aria-label="Play ${movie.title}">
       <img class="poster" src="${getPoster(movie)}" alt="${movie.title} poster" loading="lazy" />
       <div class="card-body">
         <h3>${movie.title}</h3>
         <p class="meta">${(movie.genre_names || []).join(', ') || 'Movie'} · ${getYear(movie)} · ⭐ ${(movie.vote_average || 0).toFixed(1)}</p>
         <p class="overview">${movie.overview || 'No description available.'}</p>
-        <a class="details-link" href="${getMovieLink(movie)}" target="_blank" rel="noopener noreferrer">View Details</a>
+        <button class="details-link" data-play-movie="${movie.id || ''}" type="button">▶ Play on this site</button>
       </div>
     </article>
   `).join(''));
@@ -151,15 +194,33 @@ loadMoreBtn.addEventListener('click', () => {
 });
 
 movieGrid.addEventListener('click', (event) => {
-  const detailsLink = event.target.closest('.details-link');
-  if (detailsLink) return;
-
   const card = event.target.closest('.movie-card');
   if (!card) return;
 
-  const link = card.dataset.movieLink;
-  if (!link || link === '#') return;
-  window.open(link, '_blank', 'noopener,noreferrer');
+  const id = Number(card.dataset.movieId);
+  const selected = (movieGrid.__lastRenderedMovies || []).find(m => Number(m.id) === id);
+  if (!selected) return;
+  openMoviePlayer(selected);
+});
+
+movieGrid.addEventListener('keydown', (event) => {
+  if (event.key !== 'Enter' && event.key !== ' ') return;
+  const card = event.target.closest('.movie-card');
+  if (!card) return;
+  event.preventDefault();
+  const id = Number(card.dataset.movieId);
+  const selected = (movieGrid.__lastRenderedMovies || []).find(m => Number(m.id) === id);
+  if (!selected) return;
+  openMoviePlayer(selected);
+});
+
+closePlayerBtn.addEventListener('click', closeMoviePlayer);
+playerModal.addEventListener('click', (event) => {
+  if (event.target.closest('[data-close-player="true"]')) closeMoviePlayer();
+});
+
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape' && playerModal.classList.contains('show')) closeMoviePlayer();
 });
 
 document.getElementById('year').textContent = new Date().getFullYear();
