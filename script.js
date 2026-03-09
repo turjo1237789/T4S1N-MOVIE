@@ -33,6 +33,10 @@ function getYear(movie) {
   return movie.release_date ? movie.release_date.slice(0, 4) : 'N/A';
 }
 
+function getMovieLink(movie) {
+  return movie?.id ? `https://www.themoviedb.org/movie/${movie.id}` : '#';
+}
+
 function renderMovies(list, append = false) {
   if (!append) movieGrid.innerHTML = '';
 
@@ -42,12 +46,13 @@ function renderMovies(list, append = false) {
   }
 
   movieGrid.insertAdjacentHTML('beforeend', list.map(movie => `
-    <article class="movie-card">
+    <article class="movie-card" data-movie-link="${getMovieLink(movie)}">
       <img class="poster" src="${getPoster(movie)}" alt="${movie.title} poster" loading="lazy" />
       <div class="card-body">
         <h3>${movie.title}</h3>
         <p class="meta">${(movie.genre_names || []).join(', ') || 'Movie'} · ${getYear(movie)} · ⭐ ${(movie.vote_average || 0).toFixed(1)}</p>
         <p class="overview">${movie.overview || 'No description available.'}</p>
+        <a class="details-link" href="${getMovieLink(movie)}" target="_blank" rel="noopener noreferrer">View Details</a>
       </div>
     </article>
   `).join(''));
@@ -143,6 +148,18 @@ loadMoreBtn.addEventListener('click', () => {
   if (currentPage >= totalPages) return;
   currentPage += 1;
   loadMovies(true);
+});
+
+movieGrid.addEventListener('click', (event) => {
+  const detailsLink = event.target.closest('.details-link');
+  if (detailsLink) return;
+
+  const card = event.target.closest('.movie-card');
+  if (!card) return;
+
+  const link = card.dataset.movieLink;
+  if (!link || link === '#') return;
+  window.open(link, '_blank', 'noopener,noreferrer');
 });
 
 document.getElementById('year').textContent = new Date().getFullYear();
