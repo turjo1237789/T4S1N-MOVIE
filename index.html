@@ -58,6 +58,26 @@
     <p>© <span id="year"></span> T4S1N MOVIE · enjoy your time with T4S1N movie</p>
   </footer>
 
+
+  <div id="playerModal" class="player-modal" aria-hidden="true">
+    <div class="player-backdrop" data-close-player="true"></div>
+    <div class="player-dialog glass" role="dialog" aria-modal="true" aria-labelledby="playerTitle">
+      <button id="closePlayerBtn" class="close-player" aria-label="Close player">✕</button>
+      <h3 id="playerTitle">Now Playing</h3>
+      <p id="playerMeta" class="player-meta"></p>
+      <div class="player-frame-wrap">
+        <iframe
+          id="playerFrame"
+          src=""
+          title="Movie trailer"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen
+        ></iframe>
+      </div>
+      <p id="playerStatus" class="player-status"></p>
+    </div>
+  </div>
+
   <script src="script.js"></script>
 </body>
 </html>
