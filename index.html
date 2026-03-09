@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>T4S1N MOVIE | enjoy your time with T4S1N movie</title>
+  <meta name="description" content="enjoy your time with T4S1N movie" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <canvas id="particles"></canvas>
+
+  <header class="hero">
+    <nav class="top-nav glass">
+      <div class="brand">T4S1N MOVIE</div>
+      <div class="nav-right">enjoy your time with T4S1N movie</div>
+    </nav>
+
+    <div class="hero-content">
+      <h1>Watch Global Movies in One Place</h1>
+      <p>
+        Professional movie-box style platform with real online movie catalog support, search,
+        genre filtering, and cinematic visuals.
+      </p>
+
+      <div class="search-wrap glass">
+        <input id="searchInput" type="text" placeholder="Search movie name..." />
+        <button id="searchBtn">Search</button>
+      </div>
+
+      <div class="chip-row" id="genreFilters"></div>
+      <p id="apiHint" class="api-hint"></p>
+    </div>
+  </header>
+
+  <main>
+    <section class="section-head">
+      <h2>World Movie Collection</h2>
+      <p id="statusText">Loading movies...</p>
+    </section>
+
+    <section id="movieGrid" class="movie-grid"></section>
+
+    <div class="load-more-wrap">
+      <button id="loadMoreBtn" class="load-more-btn">Load More</button>
+    </div>
+
+    <section class="about glass">
+      <h3>About</h3>
+      <p>&lt;/&gt; DEVELOPED WITH LOVE AND CARE BY T4S1N</p>
+    </section>
+  </main>
+
+  <footer>
+    <p>© <span id="year"></span> T4S1N MOVIE · enjoy your time with T4S1N movie</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
